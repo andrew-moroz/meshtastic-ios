@@ -60,7 +60,7 @@ class MasterViewController
         {
             if (self.tvcChats != nil)
             {
-                self.tvcChats.Add_Update_Item()
+                self.tvcChats?.Add_Update_Item()
             }
             show_tbcDeviceDetails()
         }
@@ -98,11 +98,15 @@ class MasterViewController
         // Create OK button with action handler
         let cancel = UIAlertAction(title: "cancel connecting", style: .default, handler: { (action) -> Void in
             print("Cancel button tapped")
-            BLEConroller.shared.cancelConnect()
+            BLEController.shared.cancelConnect()
          })
+        let nevermind = UIAlertAction(title: "forget it", style: .default) { action in
+            print("Nevermind button tapped")
+        }
         
         //Add OK button to a dialog message
         dialogMessage.addAction(cancel)
+        dialogMessage.addAction(nevermind)
 
         let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
 
@@ -200,7 +204,7 @@ class MasterViewController
     ///
     public func DidSelectDevice(peripheral: CBPeripheral)
     {
-        BLEConroller.shared.connectToDevice(peripheral: peripheral)
+        BLEController.shared.connectToDevice(peripheral: peripheral)
     }
 
     
@@ -211,7 +215,7 @@ class MasterViewController
     ///
     public func didTriggerDisconnect(peripheral: CBPeripheral)
     {
-        BLEConroller.shared.disconnectFromDevice(peripheral: peripheral)
+        BLEController.shared.disconnectFromDevice(peripheral: peripheral)
         self.masterDataProcessor.resetDB()
     }
     
@@ -220,13 +224,13 @@ class MasterViewController
     ///
     public func didTriggerRefreshDeviceList()
     {
-        BLEConroller.shared.rescanForDevices()
+        BLEController.shared.rescanForDevices()
     }
     
     
     public func didTriggerSendMessage(message: String, toUserID: String)
     {
-        BLEConroller.shared.sendMessage(message: message, toUserID: toUserID)
+        BLEController.shared.sendMessage(message: message, toUserID: toUserID)
     }
     
     
@@ -235,11 +239,11 @@ class MasterViewController
     /// - Parameters:
     ///     - dataFieldName: The name of the datafield whose name was changed
     ///     - value: The new Value of the datafield
-    ///     - currentRaidioConfig: The config data to be updated
+    ///     - currentRadioConfig: The config data to be updated
     ///
-    public func radioConfigValueUpdated(dataFieldName: String, value: String, currentRaidioConfig: RadioConfig_DO)
+    public func radioConfigValueUpdated(dataFieldName: String, value: String, currentRadioConfig: RadioConfig_DO)
     {
-        masterDataProcessor.radioConfig_setValue(dataFieldName: dataFieldName, value: value, currentRaidioConfig: currentRaidioConfig)
+        masterDataProcessor.radioConfig_setValue(dataFieldName: dataFieldName, value: value, currentRadioConfig: currentRadioConfig)
     }
 
     

@@ -29,7 +29,7 @@ class tvcConfig: UITableViewController
                 let dataFieldName = vcEdit.CellData.dataFieldName
                 let value = vcEdit.CellData.value
                 
-                MasterViewController.shared.radioConfigValueUpdated(dataFieldName: dataFieldName, value: value, currentRaidioConfig: self.radioConfig)
+                MasterViewController.shared.radioConfigValueUpdated(dataFieldName: dataFieldName, value: value, currentRadioConfig: self.radioConfig)
             }
         }
 

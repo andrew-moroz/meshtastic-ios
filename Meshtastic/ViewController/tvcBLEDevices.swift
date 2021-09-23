@@ -112,7 +112,7 @@ class tvcBLEDevices: UITableViewController
         {
             var tmpTableDataObject = tableDataObject()
             tableDataArray.removeAll()
-            if(BLEConroller.shared.isBLEConnected)
+            if(BLEController.shared.isBLEConnected)
             {
                 addConnectedDevice()
             }
@@ -160,11 +160,11 @@ class tvcBLEDevices: UITableViewController
     func addConnectedDevice()
     {
         // Check if there is a connected device
-        if(BLEConroller.shared.isBLEConnected)
+        if(BLEController.shared.isBLEConnected)
         {
             for element in tableDataArray
             {
-                if (element.deviceName == BLEConroller.shared.connectedDevice.name)
+                if (element.deviceName == BLEController.shared.connectedDevice.name)
                 {
                     // If the table allready contains the connected device there is nothing to do
                     return
@@ -172,7 +172,7 @@ class tvcBLEDevices: UITableViewController
             }
             // If the table doesn't contain the connected device we have to add it
             var tmpTableDataObject = tableDataObject()
-            tmpTableDataObject.peripheral = BLEConroller.shared.connectedDevice
+            tmpTableDataObject.peripheral = BLEController.shared.connectedDevice
             self.tableDataArray += [tmpTableDataObject]
         }
     }
@@ -294,9 +294,9 @@ class tvcBLEDevices: UITableViewController
             return
         }
         
-        if (BLEConroller.shared.isBLEConnected)
+        if (BLEController.shared.isBLEConnected)
         {
-            if (tableDataArray[indexPath.row].peripheral == BLEConroller.shared.connectedDevice)
+            if (tableDataArray[indexPath.row].peripheral == BLEController.shared.connectedDevice)
             {
                 //performSegue(withIdentifier: "SegueShowDeviceDetails", sender: nil)
                 

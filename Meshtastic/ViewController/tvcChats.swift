@@ -47,8 +47,10 @@ class tvcChats: UITableViewController
     public func Add_Update_Item()
     {
         self.chatUsersArray = self.user_DP.getChatUsers()
+        print("self.chatUsersArray: \(self.chatUsersArray)")
         self.tableView.reloadData()
         self.needsReload = false
+        print("reloaded tableView and set self.needsReload back to false")
     }
     //---------------------------------------------------------------------------------------
 

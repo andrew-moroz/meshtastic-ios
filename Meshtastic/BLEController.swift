@@ -10,10 +10,10 @@ import CoreBluetooth
 
 
 
-class BLEConroller : NSObject
+class BLEController : NSObject
 {
     
-    static let shared = BLEConroller() // Make it a singleton class
+    static let shared = BLEController() // Make it a singleton class
     
     
     //---------------------------------------------------------------------------------------
@@ -121,6 +121,7 @@ class BLEConroller : NSObject
     
     public func sendMessage(message: String, toUserID: String)
     {
+        print("running sendMessage; message: \(message); toUserID: \(toUserID)")
         var toNodeID: UInt32
         let nodeInfo_DP = NodeInfo_DP()
         var toNode = NodeInfo_DO()
@@ -155,9 +156,9 @@ class BLEConroller : NSObject
         //let BROADCAST_ADDR = 0xffffffff
         let payloadData: Data = message.data(using: String.Encoding.utf8)!
     
-        var subPacket = SubPacket()
-        subPacket.data.payload = payloadData
-        subPacket.data.portnum = dataType
+        var subPacket = DataMessage()
+        subPacket.payload = payloadData
+        subPacket.portnum = dataType
         
         var meshPacket = MeshPacket()
         //meshPacket.to = UInt32(BROADCAST_ADDR)
@@ -186,7 +187,7 @@ class BLEConroller : NSObject
     {
         var toRadio: ToRadio!
         toRadio = ToRadio()
-        toRadio.setOwner = myUser
+//        toRadio.setOwner = myUser
         
         let binaryData: Data = try! toRadio.serializedData()
         if (connectedDevice.state == CBPeripheralState.connected)
@@ -205,20 +206,24 @@ class BLEConroller : NSObject
     
     public func writeRadioConfig(userPreferences: RadioConfig.UserPreferences, channelSettings: ChannelSettings)
     {
-        var toRadio: ToRadio!
-        toRadio = ToRadio()
-        toRadio.setRadio.channelSettings = channelSettings
-        toRadio.setRadio.preferences = userPreferences
+        var channel = Channel()
+        channel.settings = channelSettings
         
-        let binaryData: Data = try! toRadio.serializedData()
-        if (connectedDevice.state == CBPeripheralState.connected)
-        {
-            connectedDevice.writeValue(binaryData, for: TORADIO_characteristic, type: .withResponse)
+        let channelSettingsBinaryData: Data = try! channel.serializedData()
+        if connectedDevice.state == CBPeripheralState.connected {
+            connectedDevice.writeValue(channelSettingsBinaryData, for: TORADIO_characteristic, type: .withResponse)
             MasterViewController.shared.DebugPrint2View(text: "RadioConfig written to device" + "\n\r")
-        }
-        else
-        {
+        } else {
             connectToDevice(peripheral: self.connectedDevice)
+        }
+        
+        var radioConfig = RadioConfig()
+        radioConfig.preferences = userPreferences
+        
+        let radioConfigBinaryData: Data = try! radioConfig.serializedData()
+        if connectedDevice.state == CBPeripheralState.connected {
+            connectedDevice.writeValue(radioConfigBinaryData, for: TORADIO_characteristic, type: .withResponse)
+            MasterViewController.shared.DebugPrint2View(text: "RadioConfig written to device" + "\n\r")
         }
         
     }
@@ -234,7 +239,7 @@ class BLEConroller : NSObject
 // MARK: - BLE controller extension (delegate callbacks)
 //---------------------------------------------------------------------------------------
 
-extension BLEConroller: CBCentralManagerDelegate
+extension BLEController: CBCentralManagerDelegate
 {
     //---------------------------------------------------------------------------------------
     // Advertisement and Connection
@@ -315,7 +320,7 @@ extension BLEConroller: CBCentralManagerDelegate
 // MARK: - BLE peripheral extension (delegate callbacks)
 //---------------------------------------------------------------------------------------
 
-extension BLEConroller: CBPeripheralDelegate
+extension BLEController: CBPeripheralDelegate
 {
     //---------------------------------------------------------------------------------------
     // Discover Services and Characteristics
@@ -333,7 +338,10 @@ extension BLEConroller: CBPeripheralDelegate
             {
                 print ("Meshtastic service OK")
                 
-                peripheral.discoverCharacteristics(nil, for: service)
+//                peripheral.discoverCharacteristics(nil, for: service)
+                let characteristics = [TORADIO_UUID, FROMRADIO_UUID, FROMNUM_UUID]
+//                peripheral.discoverCharacteristics([TORADIO_UUID, FROMRADIO_UUID, FROMNUM_UUID], for: service)
+                peripheral.discoverCharacteristics(characteristics, for: service)
             }
         }
     }
@@ -353,9 +361,11 @@ extension BLEConroller: CBPeripheralDelegate
                 print("TORADIO characteristic OK")
                 TORADIO_characteristic = characteristic
                 var toRadio: ToRadio = ToRadio()
-                toRadio.wantConfigID = 32168
+//                toRadio.wantConfigID = 32168
+                toRadio.wantConfigID = 0
                 let binaryData: Data = try! toRadio.serializedData()
                 peripheral.writeValue(binaryData, for: characteristic, type: .withResponse)
+                peripheral.readValue(for: FROMRADIO_characteristic)
                 break
             
             case FROMRADIO_UUID:
